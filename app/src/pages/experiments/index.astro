@@ -1,0 +1,191 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import { Image } from "astro:assets";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import config from "@/config";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+
+const experiments = await getCollection(
+  "experiments",
+  ({ data }) => !data.draft
+);
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString(locale, {
+    year: "numeric",
+    month: "short",
+  });
+}
+
+// Sort: featured first, then most recently updated
+experiments.sort((a, b) => {
+  if (a.data.featured && !b.data.featured) return -1;
+  if (!a.data.featured && b.data.featured) return 1;
+
+  const aDate = new Date(a.data.updatedDate ?? a.data.startDate).getTime();
+  const bDate = new Date(b.data.updatedDate ?? b.data.startDate).getTime();
+  return bDate - aDate;
+});
+
+function getBadgeColor(status: string) {
+  switch (status) {
+    case "completed":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-green-200 dark:border-green-800";
+    case "in-progress":
+      return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border-amber-200 dark:border-amber-800";
+    case "paused":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700";
+    case "exploring":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-200 dark:border-blue-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
+function formatStatus(status: string) {
+  return status
+    .split("-")
+    .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+    .join(" ");
+}
+---
+
+<Layout title={`Experiments | ${config.site.title}`}>
+  <Header />
+  <Breadcrumb />
+
+  <Main
+    pageTitle="Experiments"
+    pageDesc="Projects, prototypes, and open questions I'm currently exploring."
+  >
+    <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+      {
+        experiments.map(exp => (
+          <div class="border-border bg-background relative flex flex-col rounded-lg border transition-shadow hover:shadow-md">
+            <div class="bg-muted border-border aspect-video w-full overflow-hidden rounded-t-lg border-b">
+              {exp.data.cover ? (
+                <Image
+                  src={exp.data.cover as any}
+                  alt={exp.data.coverAlt || `Cover image for ${exp.data.title}`}
+                  class="h-full w-full object-cover"
+                  width={600}
+                  height={338}
+                />
+              ) : (
+                <div class="text-muted-foreground bg-background flex h-full w-full items-center justify-center opacity-50">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <div class="flex flex-grow flex-col p-5">
+              <div class="mb-2">
+                <h3 class="text-accent text-lg font-bold">
+                  <a
+                    href={getRelativeLocaleUrl(
+                      locale,
+                      `experiments/${exp.id.split("/")[0]}`
+                    )}
+                    class="before:absolute before:inset-0 focus-visible:no-underline focus-visible:underline-offset-0"
+                  >
+                    {exp.data.title}
+                  </a>
+                </h3>
+              </div>
+
+              <p class="text-foreground mb-4 flex-grow text-sm">
+                {exp.data.description}
+              </p>
+
+              {(exp.data.github || exp.data.demo) && (
+                <div class="relative z-10 mb-4 flex gap-4 text-sm">
+                  {exp.data.github && (
+                    <a
+                      href={exp.data.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="hover:text-accent flex items-center gap-1 underline decoration-dashed underline-offset-4"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+                        <path d="M9 18c-4.51 2-5-2-7-2" />
+                      </svg>
+                      Repo
+                    </a>
+                  )}
+                  {exp.data.demo && (
+                    <a
+                      href={exp.data.demo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="hover:text-accent flex items-center gap-1 underline decoration-dashed underline-offset-4"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                      Demo
+                    </a>
+                  )}
+                </div>
+              )}
+
+              <div class="relative z-10 mt-auto flex items-center justify-between text-xs">
+                <span
+                  class={`rounded-full border px-2 py-1 whitespace-nowrap ${getBadgeColor(exp.data.status)}`}
+                >
+                  {formatStatus(exp.data.status)}
+                </span>
+                <span class="text-foreground opacity-60">
+                  {formatDate(exp.data.startDate)}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </Main>
+  <Footer />
+</Layout>

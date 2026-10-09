@@ -1,0 +1,12 @@
+{
+  "name": "bhavansh.com",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --dir app dev",
+    "build": "pnpm --dir app build",
+    "preview": "pnpm --dir app preview",
+    "add-entry": "node ./add-entry",
+    "check-content": "pnpm --dir app check-content"
+  }
+}

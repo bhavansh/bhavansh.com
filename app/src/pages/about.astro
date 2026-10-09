@@ -1,0 +1,73 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import config from "@/config";
+import { parseNowEntries, formatMonthYear } from "@/lib/changelog";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+
+import aboutRaw from "../../../content/about.md?raw";
+
+// Parse frontmatter manually since we're using raw import
+const fmMatch = aboutRaw.match(/^---\n([\s\S]*?)\n---/);
+let title = "About Me";
+let description = "My career, resume, and a bit about me.";
+if (fmMatch) {
+  const fm = fmMatch[1];
+  const tMatch = fm.match(/title:\s*"(.*?)"/);
+  if (tMatch) title = tMatch[1];
+  const dMatch = fm.match(/description:\s*"(.*?)"/);
+  if (dMatch) description = dMatch[1];
+}
+
+// Split the file at "## Career"
+const parts = aboutRaw.split(/^## Career\s*$/m);
+const topPart = parts[0].replace(/^---\n[\s\S]*?\n---\n/, ""); // strip frontmatter
+const careerPart = parts[1] ? parts[1].trim() : "";
+
+const processor = await createMarkdownProcessor();
+const topHtml = (await processor.render(topPart)).code;
+
+const entries = careerPart ? await parseNowEntries(careerPart, "about.md") : [];
+---
+
+<Layout title={`${title} | ${config.site.title}`} description={description}>
+  <Header />
+
+  <Breadcrumb />
+
+  <Main pageTitle={title} class="app-prose">
+    <div set:html={topHtml} />
+
+    {
+      entries.length > 0 && (
+        <div class="mt-12">
+          <h2 class="mb-6 text-2xl font-semibold">Career</h2>
+          <div class="border-border ml-2 space-y-12 border-l-2 border-dashed pl-6">
+            {entries.map(entry => (
+              <article class="relative">
+                <div class="border-skin-accent bg-skin-fill absolute top-1.5 -left-[35px] h-4 w-4 rounded-full border-2" />
+                <div class="text-accent mb-2 text-sm font-semibold">
+                  {formatMonthYear(entry.date)}
+                </div>
+                {entry.heading && (
+                  <h3 class="mt-0 mb-3 text-xl font-bold">{entry.heading}</h3>
+                )}
+                {entry.html && (
+                  <div
+                    class="prose text-foreground max-w-none"
+                    set:html={entry.html}
+                  />
+                )}
+              </article>
+            ))}
+          </div>
+        </div>
+      )
+    }
+  </Main>
+
+  <Footer />
+</Layout>

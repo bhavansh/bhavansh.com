@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+app/dist/
+app/.astro/
+app/public/pagefind/
+app/src/assets/_content/
+*.env
+.env*
+!.env.example

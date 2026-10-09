@@ -1,0 +1,68 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import ImageLightbox from "@/components/ImageLightbox.astro";
+import config from "@/config";
+import { Image } from "astro:assets";
+
+// Import all images
+const images = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/_content/my-corner-of-fun/**/*.{jpeg,jpg,png,webp,avif}",
+  { eager: true }
+);
+
+// Prepare panels array
+const panels = Object.entries(images).map(([path, imgFn]) => {
+  const fileName = path.split("/").pop() || "";
+  const baseName = fileName.replace(/\.[^/.]+$/, "");
+
+  return {
+    path,
+    fileName,
+    baseName,
+    image: imgFn.default,
+  };
+});
+
+// Sort panels: newest first by filename (which are now unix timestamps)
+panels.sort((a, b) => b.fileName.localeCompare(a.fileName));
+---
+
+<Layout title={`My Corner of Fun | ${config.site.title}`}>
+  <Header />
+  <Breadcrumb />
+
+  <Main
+    pageTitle="My Corner of Fun"
+    pageDesc="A collection of fun manga snapshots, quotes, and visuals."
+  >
+    <div class="mt-8 columns-1 gap-4 space-y-4 sm:columns-2 md:columns-3">
+      {
+        panels.map((panel, index) => (
+          <div
+            class="group relative mb-4 cursor-pointer break-inside-avoid"
+            data-lightbox-trigger={index}
+          >
+            <Image
+              src={panel.image}
+              alt={panel.baseName}
+              class="border-border h-auto w-full rounded border shadow-sm transition-transform duration-300 group-hover:shadow-md"
+              width={600}
+              widths={[300, 600, 900]}
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+            />
+          </div>
+        ))
+      }
+    </div>
+  </Main>
+
+  <ImageLightbox
+    images={panels.map(p => ({ src: p.image.src, alt: p.baseName }))}
+  />
+
+  <Footer />
+</Layout>

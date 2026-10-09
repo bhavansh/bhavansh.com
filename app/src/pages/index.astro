@@ -1,0 +1,187 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Socials from "@/components/Socials.astro";
+import Card from "@/components/Card.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import { useTranslations } from "@/i18n";
+import config from "@/config";
+
+const { socials } = config;
+
+const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
+
+const writings = await getCollection("writings");
+const sortedPosts = getSortedPosts(writings);
+const recentPosts = sortedPosts;
+
+const experiments = await getCollection(
+  "experiments",
+  ({ data }) => !data.draft
+);
+const recentExperiments = experiments
+  .sort((a, b) => b.data.startDate.getTime() - a.data.startDate.getTime())
+  .slice(0, 3);
+
+const homePath = getRelativeLocaleUrl(locale, "");
+---
+
+<Layout>
+  <Header />
+  <main
+    id="main-content"
+    data-layout="index"
+    data-home-path={homePath}
+    class="app-layout my-1"
+  >
+    <section id="hero" class="border-border border-b pt-8 pb-6">
+      <div
+        class="flex flex-col gap-6 sm:flex-row-reverse sm:items-center sm:justify-between"
+      >
+        <div class="flex justify-center sm:w-1/3 sm:justify-end">
+          <img
+            src="/profile.png"
+            alt="Bhavansh Gupta"
+            class="border-border h-32 w-32 rounded-full border-2 object-cover shadow-sm sm:h-40 sm:w-40"
+          />
+        </div>
+        <div class="sm:w-2/3">
+          <h1 class="my-4 inline-block text-4xl font-bold sm:my-6 sm:text-5xl">
+            Bhavansh Gupta
+          </h1>
+          <p>
+            Hi, I'm Bhavansh. I build software for a living and for fun. Welcome
+            to my little corner of the internet.
+          </p>
+          <p class="mt-2">
+            I spend my time learning about system architecture, designing clean
+            APIs, and occasionally sharing my thoughts and personal projects
+            here.
+          </p>
+          {
+            socials.length > 0 && (
+              <div class="mt-4 flex max-sm:flex-col sm:items-center">
+                <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
+                  {t.home.socialLinks}:
+                </div>
+                <Socials />
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    {
+      recentPosts.length > 0 && (
+        <section id="recent-posts" class="border-border border-b pt-12 pb-6">
+          <h2 class="text-2xl font-semibold tracking-wide">
+            {t.home.recentWritings}
+          </h2>
+          <ul>
+            {recentPosts.slice(0, 3).map(data => (
+              <Card variant="h3" {...data} />
+            ))}
+          </ul>
+          <div class="mt-4 text-center">
+            <LinkButton href={getRelativeLocaleUrl(locale, "writings")}>
+              {t.home.allWritings}
+              <IconArrowRight class="inline-block rtl:-rotate-180" />
+            </LinkButton>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      recentExperiments.length > 0 && (
+        <section
+          id="recent-experiments"
+          class="border-border border-b pt-12 pb-6"
+        >
+          <h2 class="text-2xl font-semibold tracking-wide">
+            {t.home.recentExperiments}
+          </h2>
+          <ul class="mt-4 space-y-4">
+            {recentExperiments.map(exp => (
+              <li class="my-2">
+                <a
+                  href={`/experiments/${exp.id.split("/")[0]}`}
+                  class="text-accent inline-block text-lg font-medium decoration-dashed underline-offset-4 hover:underline focus-visible:no-underline focus-visible:underline-offset-0"
+                >
+                  {exp.data.title}
+                </a>
+                <p class="text-foreground opacity-75">{exp.data.description}</p>
+              </li>
+            ))}
+          </ul>
+          <div class="mt-6 text-center">
+            <LinkButton href={getRelativeLocaleUrl(locale, "experiments")}>
+              {t.home.allExperiments}
+              <IconArrowRight class="inline-block rtl:-rotate-180" />
+            </LinkButton>
+          </div>
+        </section>
+      )
+    }
+
+    <section id="personal-strip" class="pt-12 pb-6">
+      <h2 class="text-2xl font-semibold tracking-wide">
+        {t.home.personalStrip}
+      </h2>
+      <ul class="mt-4 flex flex-wrap gap-4">
+        <li>
+          <LinkButton
+            href={getRelativeLocaleUrl(locale, "reading")}
+            class="hover:text-accent underline decoration-dashed underline-offset-4"
+          >
+            Reading
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href={getRelativeLocaleUrl(locale, "my-corner-of-fun")}
+            class="hover:text-accent underline decoration-dashed underline-offset-4"
+          >
+            My Corner of Fun
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href={getRelativeLocaleUrl(locale, "fitness")}
+            class="hover:text-accent underline decoration-dashed underline-offset-4"
+          >
+            Fitness
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href={getRelativeLocaleUrl(locale, "now")}
+            class="hover:text-accent underline decoration-dashed underline-offset-4"
+          >
+            Now
+          </LinkButton>
+        </li>
+      </ul>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset;
+    const baseRoot = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+    if (indexLayout?.layout) {
+      sessionStorage.setItem("backUrl", indexLayout.homePath ?? baseRoot);
+    }
+  });
+</script>

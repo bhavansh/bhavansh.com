@@ -1,0 +1,46 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import config from "@/config";
+import { parseNowEntries, formatMonthYear } from "@/lib/changelog";
+
+import nowRaw from "../../../../content/now.md?raw";
+
+const entries = await parseNowEntries(nowRaw, "now.md");
+---
+
+<Layout title={`Now | ${config.site.title}`}>
+  <Header />
+  <Breadcrumb />
+
+  <Main pageTitle="Now" pageDesc="What I'm focused on right now.">
+    <div
+      class="border-border mt-8 ml-2 space-y-12 border-l-2 border-dashed pl-6"
+    >
+      {
+        entries.map(entry => (
+          <article class="relative">
+            <div class="border-skin-accent bg-skin-fill absolute top-1.5 -left-[35px] h-4 w-4 rounded-full border-2" />
+            <div class="text-accent mb-2 text-sm font-semibold">
+              {formatMonthYear(entry.date)}
+            </div>
+            {entry.heading && (
+              <h2 class="mb-3 text-xl font-bold">{entry.heading}</h2>
+            )}
+            {entry.html && (
+              <div
+                class="prose text-foreground max-w-none"
+                set:html={entry.html}
+              />
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </Main>
+
+  <Footer />
+</Layout>

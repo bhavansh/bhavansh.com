@@ -1,0 +1,137 @@
+---
+import type { MarkdownHeading } from "astro";
+
+export interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+
+if (tocHeadings.length < 3) return;
+---
+
+<nav id="toc" aria-label="Table of contents">
+  <!-- Mobile / Tablet Collapsed TOC -->
+  <details class="border-border mb-8 rounded-lg border px-4 py-3 xl:hidden">
+    <summary
+      class="focus-visible:text-accent cursor-pointer font-semibold outline-none"
+    >
+      Table of contents
+    </summary>
+    <ol class="mt-4 space-y-2 text-sm">
+      {
+        tocHeadings.map(heading => (
+          <li class={heading.depth === 2 ? "" : "ml-4"}>
+            <a
+              href={`#${heading.slug}`}
+              class="toc-link text-foreground hover:text-accent focus-visible:text-accent block"
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </details>
+
+  <!-- Desktop Sticky Rail -->
+  <!-- It uses absolute positioning relative to the main content area so it sits outside the reading column -->
+  <div class="absolute top-0 left-[100%] ml-8 hidden h-full w-60 xl:block">
+    <div class="sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto">
+      <h2 class="mb-4 text-lg font-semibold">Table of contents</h2>
+      <ol class="border-border relative space-y-2 border-l text-sm">
+        <div
+          id="toc-indicator"
+          class="bg-accent absolute left-[-1px] w-[2px] transition-all duration-300"
+          style="top: 0; height: 0;"
+        >
+        </div>
+        {
+          tocHeadings.map(heading => (
+            <li class={heading.depth === 2 ? "pl-4" : "pl-8"}>
+              <a
+                href={`#${heading.slug}`}
+                class="toc-link text-foreground hover:text-accent focus-visible:text-accent block py-1 opacity-75 transition-opacity hover:opacity-100"
+                data-slug={heading.slug}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</nav>
+
+<script>
+  function initTOC() {
+    const headings = Array.from(
+      document.querySelectorAll("article h2, article h3")
+    );
+    if (headings.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        // Find first intersecting heading
+        let activeId = "";
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            activeId = entry.target.id;
+            break;
+          }
+        }
+
+        if (activeId) {
+          document.querySelectorAll(".toc-link").forEach(link => {
+            link.classList.remove("text-accent", "opacity-100", "font-medium");
+            if (link.getAttribute("href") === `#${activeId}`) {
+              link.classList.add("text-accent", "opacity-100", "font-medium");
+            }
+          });
+
+          const activeLink = document.querySelector(
+            `.xl\\:block .toc-link[href="#${activeId}"]`
+          ) as HTMLElement;
+          const indicator = document.getElementById("toc-indicator");
+
+          if (activeLink && indicator) {
+            const parent = activeLink.closest("ol") as HTMLElement;
+            if (parent) {
+              const parentTop = parent.getBoundingClientRect().top;
+              const linkTop = activeLink.getBoundingClientRect().top;
+              const scrollTop = parent.scrollTop; // In case the list itself scrolls
+              indicator.style.top = `${linkTop - parentTop + scrollTop}px`;
+              indicator.style.height = `${activeLink.offsetHeight}px`;
+            }
+          }
+        }
+      },
+      { rootMargin: "-10% 0% -80% 0%" }
+    );
+
+    headings.forEach(h => observer.observe(h));
+
+    // Smooth scroll for TOC links
+    document.querySelectorAll(".toc-link").forEach(link => {
+      link.addEventListener("click", e => {
+        const href = link.getAttribute("href");
+        if (href && href.startsWith("#")) {
+          const target = document.querySelector(href);
+          const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches;
+          if (target && !prefersReducedMotion) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: "smooth" });
+            history.pushState(null, "", href);
+          }
+        }
+      });
+    });
+  }
+
+  // Initialize on page load (Astro View Transitions support)
+  document.addEventListener("astro:page-load", initTOC);
+</script>

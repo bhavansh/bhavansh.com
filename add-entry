@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+import('./app/scripts/add-entry.mjs').then(m => m.default ? m.default() : m.main?.());

@@ -1,0 +1,180 @@
+---
+export interface Props {
+  images: {
+    src: string;
+    alt: string;
+  }[];
+}
+
+const { images } = Astro.props;
+---
+
+<dialog
+  id="lightbox"
+  class="pointer-events-none fixed inset-0 z-50 m-0 h-full max-h-full w-full max-w-full border-none bg-black/90 p-0 opacity-0 backdrop-blur-md transition-opacity duration-300 outline-none open:pointer-events-auto open:opacity-100"
+>
+  <div
+    class="absolute inset-0 flex items-center justify-center p-4 sm:p-8"
+    id="lightbox-backdrop"
+  >
+    <button
+      id="lightbox-close"
+      class="absolute top-4 right-4 z-10 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/80 sm:top-8 sm:right-8"
+      aria-label="Close lightbox"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <button
+      id="lightbox-prev"
+      class="absolute top-1/2 left-4 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/80 sm:left-8"
+      aria-label="Previous image"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <button
+      id="lightbox-next"
+      class="absolute top-1/2 right-4 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/80 sm:right-8"
+      aria-label="Next image"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <div
+      class="pointer-events-none relative flex max-h-full max-w-full flex-col items-center justify-center"
+    >
+      <img
+        id="lightbox-img"
+        src=""
+        alt=""
+        class="pointer-events-auto max-h-[85vh] max-w-full rounded object-contain shadow-2xl"
+      />
+      <div
+        id="lightbox-caption"
+        class="prose prose-invert prose-p:my-0 prose-a:text-blue-400 hover:prose-a:text-blue-300 pointer-events-auto mt-4 max-w-2xl text-center text-sm text-white/90"
+      >
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline define:vars={{ images }}>
+  const dialog = document.getElementById("lightbox");
+  const img = document.getElementById("lightbox-img");
+  const caption = document.getElementById("lightbox-caption");
+  const closeBtn = document.getElementById("lightbox-close");
+  const prevBtn = document.getElementById("lightbox-prev");
+  const nextBtn = document.getElementById("lightbox-next");
+  const backdrop = document.getElementById("lightbox-backdrop");
+  const triggers = document.querySelectorAll("[data-lightbox-trigger]");
+
+  let currentIndex = 0;
+
+  function updateLightbox(index) {
+    if (index < 0 || index >= images.length) return;
+    currentIndex = index;
+    img.src = images[index].src;
+    img.alt = images[index].alt;
+
+    // Find caption from the DOM since it's already rendered
+    const triggerEl = document.querySelector(
+      `[data-lightbox-trigger="${index}"]`
+    );
+    const captionSource = triggerEl?.querySelector(".caption-source");
+
+    if (captionSource) {
+      caption.innerHTML = captionSource.innerHTML;
+      caption.style.display = "block";
+    } else {
+      caption.innerHTML = "";
+      caption.style.display = "none";
+    }
+
+    prevBtn.style.display = index > 0 ? "block" : "none";
+    nextBtn.style.display = index < images.length - 1 ? "block" : "none";
+  }
+
+  function openLightbox(index) {
+    updateLightbox(index);
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    dialog.close();
+    document.body.style.overflow = "";
+  }
+
+  // Event Listeners
+  triggers.forEach(trigger => {
+    trigger.addEventListener("click", () => {
+      const index = parseInt(trigger.getAttribute("data-lightbox-trigger"), 10);
+      openLightbox(index);
+    });
+  });
+
+  closeBtn.addEventListener("click", closeLightbox);
+
+  backdrop.addEventListener("click", e => {
+    if (e.target === backdrop) {
+      closeLightbox();
+    }
+  });
+
+  prevBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    if (currentIndex > 0) updateLightbox(currentIndex - 1);
+  });
+
+  nextBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    if (currentIndex < images.length - 1) updateLightbox(currentIndex + 1);
+  });
+
+  document.addEventListener("keydown", e => {
+    if (!dialog.open) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft" && currentIndex > 0)
+      updateLightbox(currentIndex - 1);
+    if (e.key === "ArrowRight" && currentIndex < images.length - 1)
+      updateLightbox(currentIndex + 1);
+  });
+</script>

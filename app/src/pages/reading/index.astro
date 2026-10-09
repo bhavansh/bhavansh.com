@@ -1,0 +1,31 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import config from "@/config";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+
+import readingRaw from "../../../../content/reading.md?raw";
+
+const processor = await createMarkdownProcessor();
+const readingRendered = await processor.render(readingRaw);
+---
+
+<Layout title={`Reading | ${config.site.title}`}>
+  <Header />
+  <Breadcrumb />
+
+  <Main
+    pageTitle="Reading"
+    pageDesc="Notes and highlights from books, articles, and papers."
+  >
+    <div
+      class="prose text-foreground prose-h2:text-xl prose-h2:font-bold prose-h2:text-accent prose-h2:mb-2 prose-h2:mt-10 mt-8 max-w-none"
+      set:html={readingRendered.code}
+    />
+  </Main>
+
+  <Footer />
+</Layout>
