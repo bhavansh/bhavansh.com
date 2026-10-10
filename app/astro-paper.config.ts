@@ -4,13 +4,16 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://bhavansh.com",
     title: "Bhavansh Gupta",
-    description: "My personal website and corner of fun on the internet.",
+    description: "Personal website of Bhavansh Gupta, a Software Developer sharing thoughts, experiments, and a corner of fun on the internet. Specializing in software development and building things.",
+    keywords: ["bhavansh", "bhavansh gupta", "bhavansh software", "bhavansh developer", "software engineer", "developer portfolio"],
     author: "Bhavansh Gupta",
     profile: "https://bhavansh.com",
     ogImage: "site-image.png",
     lang: "en",
     timezone: "Asia/Kolkata",
     dir: "ltr",
+    googleVerification: "", // Since you verified via Cloudflare DNS, you can leave this empty!
+    googleAnalyticsId: "G-TM0F3CJM1C", // Add your Google Analytics Measurement ID here (e.g. G-XXXXXXXXXX)
   },
   posts: {
     perPage: 4,

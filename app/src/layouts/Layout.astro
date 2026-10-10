@@ -55,6 +55,7 @@ const rssHref = getRelativeLocaleUrl(
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="author" content={site.author} />
+    {site.keywords && <meta name="keywords" content={site.keywords.join(", ")} />}
     <link rel="sitemap" href={getAssetPath("sitemap-index.xml")} />
 
     <!-- Open Graph -->
@@ -92,6 +93,20 @@ const rssHref = getRelativeLocaleUrl(
           name="google-site-verification"
           content={site.googleVerification}
         />
+      )
+    }
+
+    {
+      site.googleAnalyticsId && (
+        <>
+          <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${site.googleAnalyticsId}`} />
+          <script is:inline define:vars={{ id: site.googleAnalyticsId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', id);
+          </script>
+        </>
       )
     }
 

@@ -57,7 +57,7 @@ On the storage side, we maintain two separate tables:
 
 A background sync process reads from the provider status table, maps provider-specific statuses to our internal status model and applies the transition to the internal table. The internal table is the source of truth for all downstream systems.
 
-![](https://cdn.hashnode.com/uploads/covers/5f367218877a013acb03c707/e6b7936f-b36e-4f4f-806f-6c2752d5dfb2.png align="center")
+![](./image1.png)
 
 * * *
 
@@ -107,17 +107,17 @@ Instead, we grouped statuses by their role in the payment lifecycle:
 
 From these three groups, all valid transitions follow from four rules:
 
-![](https://cdn.hashnode.com/uploads/covers/5f367218877a013acb03c707/01f399bb-ce67-4c9a-9cf2-c1b09f17c3c2.png align="center")
+![](./image2.png)
 
 And two explicit rejections:
 
-![](https://cdn.hashnode.com/uploads/covers/5f367218877a013acb03c707/33d23e14-1034-4ad1-9a0f-67f01c8ca70f.png align="center")
+![](./image3.png)
 
 Note that final-to-same-final is treated as a no-op, not an error. A duplicate SUCCESS webhook for an already-COMPLETED payment is expected behaviour given webhook retry semantics. Silently ignoring it is the correct response — rejecting it as an error would generate false alerts.
 
 ### State Transition Diagram
 
-![](https://cdn.hashnode.com/uploads/covers/5f367218877a013acb03c707/671a192d-fff1-45bd-9736-209f999e4e7a.png align="center")
+![](./image4.png)
 
 * * *
 
@@ -127,7 +127,7 @@ Before the transition guard was applied uniformly to both tables, the raw provid
 
 The failure scenario played out as follows:
 
-![](https://cdn.hashnode.com/uploads/covers/5f367218877a013acb03c707/2805a30f-fa02-4b4d-bf09-4c60603f1c6d.png align="center")
+![](./image5.png)
 
 The internal state was correct because the Java service layer already had transition guards. But the provider table had been overwritten to a stale state. Any process reading the provider table directly — monitoring queries, reconciliation jobs, support tooling — would see a payment stuck in PROCESSING that had already settled.
 

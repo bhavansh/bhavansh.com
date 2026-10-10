@@ -61,7 +61,7 @@ async function copyFiles(src, dest, extensions, renameToTimestamp = false) {
         if (renameToTimestamp) {
           const stats = await fs.stat(srcPath);
           const timestamp = Math.floor(stats.mtimeMs || stats.birthtimeMs);
-          destName = `${timestamp}${ext}`;
+          destName = `${timestamp}-${entry.name}`;
         }
         const destPath = path.join(dest, destName);
         await fs.copyFile(srcPath, destPath);
