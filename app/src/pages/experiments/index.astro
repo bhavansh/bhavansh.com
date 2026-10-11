@@ -18,8 +18,9 @@ const experiments = await getCollection(
 
 function formatDate(date: Date) {
   return date.toLocaleDateString(locale, {
-    year: "numeric",
+    day: "numeric",
     month: "short",
+    year: "numeric",
   });
 }
 
@@ -32,28 +33,6 @@ experiments.sort((a, b) => {
   const bDate = new Date(b.data.updatedDate ?? b.data.startDate).getTime();
   return bDate - aDate;
 });
-
-function getBadgeColor(status: string) {
-  switch (status) {
-    case "completed":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-green-200 dark:border-green-800";
-    case "in-progress":
-      return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border-amber-200 dark:border-amber-800";
-    case "paused":
-      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700";
-    case "exploring":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-200 dark:border-blue-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-}
-
-function formatStatus(status: string) {
-  return status
-    .split("-")
-    .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-    .join(" ");
-}
 ---
 
 <Layout title={`Experiments | ${config.site.title}`}>
@@ -78,23 +57,12 @@ function formatStatus(status: string) {
                   height={338}
                 />
               ) : (
-                <div class="text-muted-foreground bg-background flex h-full w-full items-center justify-center opacity-50">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
-                </div>
+                <img
+                  src={`/experiments/${exp.id.split("/")[0]}/index.png`}
+                  alt={exp.data.title}
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                />
               )}
             </div>
 
@@ -172,11 +140,6 @@ function formatStatus(status: string) {
               )}
 
               <div class="relative z-10 mt-auto flex items-center justify-between text-xs">
-                <span
-                  class={`rounded-full border px-2 py-1 whitespace-nowrap ${getBadgeColor(exp.data.status)}`}
-                >
-                  {formatStatus(exp.data.status)}
-                </span>
                 <span class="text-foreground opacity-60">
                   {formatDate(exp.data.startDate)}
                 </span>

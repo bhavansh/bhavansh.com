@@ -43,7 +43,8 @@ const experiments = defineCollection({
     z.object({
       title: z.string(),
       description: z.string(),
-      status: z.enum(["exploring", "in-progress", "paused", "completed"]),
+      status: z.enum(["exploring", "in-progress", "paused", "completed"]).optional(),
+      remoteUrl: z.string().url().optional(),
       startDate: z.date(),
       updatedDate: z.date().optional().nullable(),
       cover: image().or(z.string()).optional(),
