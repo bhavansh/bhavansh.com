@@ -1,12 +1,16 @@
 import { getRelativeLocaleUrl } from "astro:i18n";
-import { BLOG_PATH } from "@/content.config";
+import { BLOG_PATH, THOUGHTS_PATH } from "@/content.config";
 import { slugifyStr } from "./slugify";
 import config from "@/config";
 
-function getPostPathSegments(filePath: string | undefined): string[] {
+function getPostPathSegments(
+  filePath: string | undefined,
+  collection: string = "writings"
+): string[] {
+  const basePath = collection === "thoughts" ? THOUGHTS_PATH : BLOG_PATH;
   return (
     filePath
-      ?.replace(BLOG_PATH, "")
+      ?.replace(basePath, "")
       .split("/")
       .filter(path => path !== "")
       .filter(path => !path.startsWith("_"))
@@ -20,8 +24,12 @@ function getIdSlug(id: string): string {
   return postId.length > 0 ? String(postId[postId.length - 1]) : id;
 }
 
-function getPostSlugPath(id: string, filePath: string | undefined): string {
-  const pathSegments = getPostPathSegments(filePath);
+function getPostSlugPath(
+  id: string,
+  filePath: string | undefined,
+  collection: string = "writings"
+): string {
+  const pathSegments = getPostPathSegments(filePath, collection);
   const slug = getIdSlug(id);
   return pathSegments.length > 0
     ? [...pathSegments, slug].join("/")
@@ -33,8 +41,12 @@ function getPostSlugPath(id: string, filePath: string | undefined): string {
  * No base prefix, no locale — Astro handles those at a higher level.
  * e.g. `/examples/my-post`
  */
-export function getPostSlug(id: string, filePath: string | undefined): string {
-  return `/${getPostSlugPath(id, filePath)}`;
+export function getPostSlug(
+  id: string,
+  filePath: string | undefined,
+  collection: string = "writings"
+): string {
+  return `/${getPostSlugPath(id, filePath, collection)}`;
 }
 
 /**
@@ -46,10 +58,11 @@ export function getPostSlug(id: string, filePath: string | undefined): string {
 export function getPostUrl(
   id: string,
   filePath: string | undefined,
-  locale: string | undefined = config.site.lang
+  locale: string | undefined = config.site.lang,
+  collection: string = "writings"
 ): string {
   return getRelativeLocaleUrl(
     locale,
-    `writings/${getPostSlugPath(id, filePath)}`
+    `${collection}/${getPostSlugPath(id, filePath, collection)}`
   );
 }

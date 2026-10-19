@@ -4,6 +4,7 @@ export interface UIStrings {
     writings: string;
     experiments: string;
     personal: string;
+    thoughts: string;
     tags: string;
     about: string;
     archives: string;
@@ -49,6 +50,9 @@ export interface UIStrings {
 
     writingsTitle: string;
     writingsDesc: string;
+
+    thoughtsTitle: string;
+    thoughtsDesc: string;
 
     experimentsTitle: string;
     experimentsDesc: string;

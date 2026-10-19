@@ -7,7 +7,7 @@ import LinkButton from "./LinkButton.astro";
 import { useTranslations } from "@/i18n";
 
 type Props = {
-  page: Page<CollectionEntry<"writings">>;
+  page: Page<CollectionEntry<"writings" | "thoughts">>;
 };
 
 const { page } = Astro.props;

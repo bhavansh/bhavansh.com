@@ -16,11 +16,13 @@ import config from "@/config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const writing = await getCollection("writings", ({ data }) => !data.draft);
-  const tags = getUniqueTags(writing);
+  const thoughts = await getCollection("thoughts", ({ data }) => !data.draft);
+  const allPosts = [...writing, ...thoughts];
+  const tags = getUniqueTags(allPosts);
 
   return tags.flatMap(({ tag, tagName }) => {
     const tagPosts = getSortedPosts(
-      writing.filter(({ data }) => slugifyAll(data.tags).includes(tag))
+      allPosts.filter(({ data }) => slugifyAll(data.tags).includes(tag))
     );
 
     return paginate(tagPosts, {

@@ -6,9 +6,15 @@ import Datetime from "./Datetime.astro";
 
 type Props = {
   variant?: "h2" | "h3";
-} & CollectionEntry<"writings">;
+} & CollectionEntry<"writings" | "thoughts">;
 
-const { variant: Heading = "h2", id, data, filePath } = Astro.props;
+const {
+  variant: Heading = "h2",
+  id,
+  data,
+  filePath,
+  collection = "writings",
+} = Astro.props;
 const { remarkPluginFrontmatter } = await render(Astro.props);
 
 const { title, description, ...props } = data;
@@ -16,7 +22,7 @@ const { title, description, ...props } = data;
 
 <li class="my-6">
   <a
-    href={getPostUrl(id, filePath, Astro.currentLocale)}
+    href={getPostUrl(id, filePath, Astro.currentLocale, collection)}
     class:list={[
       "text-accent inline-block text-lg font-medium",
       "decoration-dashed underline-offset-4 hover:underline",

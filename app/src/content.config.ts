@@ -4,24 +4,32 @@ import { glob } from "astro/loaders";
 import config from "@/config";
 
 export const BLOG_PATH = "../content/writings";
+export const THOUGHTS_PATH = "../content/thoughts";
+
+const postSchema = ({ image }: { image: any }) =>
+  z.object({
+    author: z.string().default(config.site.author),
+    pubDatetime: z.date(),
+    modDatetime: z.date().optional().nullable(),
+    title: z.string(),
+    featured: z.boolean().optional(),
+    draft: z.boolean().optional(),
+    tags: z.array(z.string()).default(["others"]),
+    ogImage: image().or(z.string()).optional(),
+    description: z.string(),
+    canonicalURL: z.string().optional(),
+    hideEditPost: z.boolean().optional(),
+    timezone: z.string().optional(),
+  });
 
 const writings = defineCollection({
   loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: BLOG_PATH }),
-  schema: ({ image }) =>
-    z.object({
-      author: z.string().default(config.site.author),
-      pubDatetime: z.date(),
-      modDatetime: z.date().optional().nullable(),
-      title: z.string(),
-      featured: z.boolean().optional(),
-      draft: z.boolean().optional(),
-      tags: z.array(z.string()).default(["others"]),
-      ogImage: image().or(z.string()).optional(),
-      description: z.string(),
-      canonicalURL: z.string().optional(),
-      hideEditPost: z.boolean().optional(),
-      timezone: z.string().optional(),
-    }),
+  schema: postSchema,
+});
+
+const thoughts = defineCollection({
+  loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: THOUGHTS_PATH }),
+  schema: postSchema,
 });
 
 const pages = defineCollection({
@@ -58,4 +66,4 @@ const experiments = defineCollection({
     }),
 });
 
-export const collections = { writings, pages, experiments };
+export const collections = { writings, pages, experiments, thoughts };

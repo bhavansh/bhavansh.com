@@ -36,8 +36,30 @@ tags: []
 
 Write here...
 `;
-  await fs.mkdir(path.join(CONTENT_DIR, 'writing'), { recursive: true });
-  const file = path.join(CONTENT_DIR, 'writing', `${slug}.md`);
+  await fs.mkdir(path.join(CONTENT_DIR, 'writings'), { recursive: true });
+  const file = path.join(CONTENT_DIR, 'writings', `${slug}.md`);
+  await fs.writeFile(file, content);
+  console.log(`Created ${file}`);
+}
+
+async function addThought() {
+  const title = await ask('Title: ');
+  const slug = await ask(`Slug [${slg(title)}]: `) || slg(title);
+  const desc = await ask('Description: ');
+  const date = new Date().toISOString();
+  
+  const content = `---
+title: "${title}"
+description: "${desc}"
+pubDatetime: ${date}
+draft: false
+tags: []
+---
+
+Write here...
+`;
+  await fs.mkdir(path.join(CONTENT_DIR, 'thoughts'), { recursive: true });
+  const file = path.join(CONTENT_DIR, 'thoughts', `${slug}.md`);
   await fs.writeFile(file, content);
   console.log(`Created ${file}`);
 }
@@ -193,12 +215,13 @@ async function main() {
   console.log(`
 What would you like to add?
 1. Article (Writing)
-2. Experiment
-3. Reading item
-4. Now update
-5. Fitness log
-6. Fitness image
-7. Panel (Image with optional caption)
+2. Thought
+3. Experiment
+4. Reading item
+5. Now update
+6. Fitness log
+7. Fitness image
+8. Panel (Image with optional caption)
 `);
 
   const choice = await ask('> ');
@@ -206,12 +229,13 @@ What would you like to add?
   try {
     switch(choice.trim()) {
       case '1': await addWriting(); break;
-      case '2': await addExperiment(); break;
-      case '3': await addReading(); break;
-      case '4': await addNow(); break;
-      case '5': await addFitnessLog(); break;
-      case '6': await addFitnessImage(); break;
-      case '7': await addPanel(); break;
+      case '2': await addThought(); break;
+      case '3': await addExperiment(); break;
+      case '4': await addReading(); break;
+      case '5': await addNow(); break;
+      case '6': await addFitnessLog(); break;
+      case '7': await addFitnessImage(); break;
+      case '8': await addPanel(); break;
       default: console.log('Invalid choice');
     }
   } catch (err) {

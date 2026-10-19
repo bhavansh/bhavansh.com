@@ -57,12 +57,12 @@ async function checkContent() {
           const content = await fs.readFile(indexMdPath, 'utf8');
           // simple check for URLs in frontmatter
           const githubMatch = content.match(/github:\s*(.+)/);
-          if (githubMatch && !githubMatch[1].trim().startsWith('http')) {
+          if (githubMatch && !githubMatch[1].trim().replace(/^["']/, '').startsWith('http')) {
             console.error(`❌ ${indexMdPath}: Invalid github URL`);
             errors++;
           }
           const demoMatch = content.match(/demo:\s*(.+)/);
-          if (demoMatch && !demoMatch[1].trim().startsWith('http')) {
+          if (demoMatch && !demoMatch[1].trim().replace(/^["']/, '').startsWith('http')) {
             console.error(`❌ ${indexMdPath}: Invalid demo URL`);
             errors++;
           }

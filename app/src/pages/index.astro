@@ -139,6 +139,14 @@ const homePath = getRelativeLocaleUrl(locale, "");
       <ul class="mt-4 flex flex-wrap gap-4">
         <li>
           <LinkButton
+            href={getRelativeLocaleUrl(locale, "thoughts")}
+            class="hover:text-accent underline decoration-dashed underline-offset-4"
+          >
+            Thoughts
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
             href={getRelativeLocaleUrl(locale, "reading")}
             class="hover:text-accent underline decoration-dashed underline-offset-4"
           >

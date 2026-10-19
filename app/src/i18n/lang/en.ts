@@ -6,6 +6,7 @@ export default {
     writings: "Writings",
     experiments: "Experiments",
     personal: "Personal",
+    thoughts: "Thoughts",
     tags: "Tags",
     about: "About",
     archives: "Archives",
@@ -51,6 +52,9 @@ export default {
 
     writingsTitle: "Writings",
     writingsDesc: "All the articles I've posted.",
+
+    thoughtsTitle: "Thoughts",
+    thoughtsDesc: "Where I write my mind.",
 
     experimentsTitle: "Experiments",
     experimentsDesc: "All the experiments I've built.",

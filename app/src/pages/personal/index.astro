@@ -20,6 +20,15 @@ const locale = Astro.currentLocale ?? config.site.lang;
     <ul class="space-y-4">
       <li>
         <a
+          href={getRelativeLocaleUrl(locale, "thoughts")}
+          class="text-accent text-lg font-medium hover:underline"
+        >
+          Thoughts
+        </a>
+        <p>Where I'll be writing my mind.</p>
+      </li>
+      <li>
+        <a
           href={getRelativeLocaleUrl(locale, "reading")}
           class="text-accent text-lg font-medium hover:underline"
         >
